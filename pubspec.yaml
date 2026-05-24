@@ -1,0 +1,53 @@
+name: game_quote_poster
+description: 从游戏截图中提取中文对话，生成名言海报
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: '>=3.10.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # OCR
+  google_mlkit_text_recognition: ^0.11.0  # Android 端中文 OCR
+
+  # 图像处理
+  image: ^4.1.0                           # Dart 端图像处理（裁剪/模糊/合成）
+
+  # 文件与存储
+  file_picker: ^6.1.0                     # 文件选择器
+  path_provider: ^2.1.0                   # 路径获取
+  image_gallery_saver: ^2.0.0             # Android 相册保存
+  share_plus: ^7.2.0                      # 分享功能
+
+  # 桌面增强
+  desktop_drop: ^0.4.0                    # Windows 拖拽加载
+  window_manager: ^0.3.0                  # Windows 窗口尺寸控制
+
+  # 工具
+  provider: ^6.1.0                        # 状态管理
+  http: ^1.1.0                            # Windows 端 HTTP 调用 OCR 服务
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+
+  # 内置字体（网络通畅后下载，暂时用系统字体兜底）
+  # fonts:
+  #   - family: NotoSansSC
+  #     fonts:
+  #       - asset: assets/fonts/NotoSansSC-Regular.ttf
+  #       - asset: assets/fonts/NotoSansSC-Bold.ttf
+  #         weight: 700
+  #   - family: NotoSerifSC
+  #     fonts:
+  #       - asset: assets/fonts/NotoSerifSC-Regular.ttf
+  #       - asset: assets/fonts/NotoSerifSC-Bold.ttf
+  #         weight: 700
