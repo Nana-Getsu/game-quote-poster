@@ -56,7 +56,9 @@ class OcrHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(json.dumps({'texts': texts}, ensure_ascii=False).encode('utf-8'))
         except Exception as e:
-            self.send_error(500, str(e))
+            # 用 ascii 避免 latin-1 编码崩溃
+            msg = str(e).encode('ascii', errors='replace').decode('ascii')
+            self.send_error(500, msg)
 
     def do_GET(self):
         if self.path == '/health':
@@ -106,10 +108,13 @@ class OcrHandler(BaseHTTPRequestHandler):
             print(f'[ERROR] PaddleOCR predict failed: {e}')
             raise
 
-        # 清理临时文件
+        # 清理临时文件（忽略失败，不阻塞主流程）
         if ocr_input_path != image_path:
             import os
-            os.unlink(ocr_input_path)
+            try:
+                os.unlink(ocr_input_path)
+            except OSError:
+                pass
 
         if not result:
             return []
@@ -139,6 +144,17 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--port', type=int, default=8765)
     args = parser.parse_args()
+
+    # 预加载 PaddleOCR 模型（避免首次请求超时）
+    print('正在预加载 PaddleOCR 模型...')
+    try:
+        OcrHandler.ocr = init_ocr()
+        if OcrHandler.ocr:
+            print('PaddleOCR 模型加载完毕')
+        else:
+            print('[WARN] PaddleOCR 未安装，OCR 功能不可用')
+    except Exception as e:
+        print(f'[WARN] PaddleOCR 加载失败: {e}')
 
     server = HTTPServer(('127.0.0.1', args.port), OcrHandler)
     print(f'OCR Server running on http://127.0.0.1:{args.port}')

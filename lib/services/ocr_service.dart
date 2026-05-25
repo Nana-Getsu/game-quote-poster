@@ -137,7 +137,7 @@ class WindowsOcrService implements OcrService {
       request.add(bodyBytes);
 
       final response = await request.close().timeout(
-        const Duration(seconds: 10),
+        const Duration(seconds: 60),
       );
 
       if (response.statusCode == 200) {
