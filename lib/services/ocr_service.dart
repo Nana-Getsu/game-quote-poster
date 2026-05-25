@@ -131,8 +131,10 @@ class WindowsOcrService implements OcrService {
       final request = await _httpClient.postUrl(
         Uri.parse('http://127.0.0.1:$_port/ocr'),
       );
+      final bodyBytes = utf8.encode(jsonEncode(body));
       request.headers.contentType = ContentType.json;
-      request.write(jsonEncode(body));
+      request.headers.set('Content-Length', bodyBytes.length.toString());
+      request.add(bodyBytes);
 
       final response = await request.close().timeout(
         const Duration(seconds: 10),

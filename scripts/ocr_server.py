@@ -33,8 +33,13 @@ class OcrHandler(BaseHTTPRequestHandler):
             self.send_error(404)
             return
 
-        content_length = int(self.headers['Content-Length'])
-        body = self.rfile.read(content_length)
+        # 兼容缺失 Content-Length 的情况
+        content_length = self.headers.get('Content-Length')
+        if content_length:
+            body = self.rfile.read(int(content_length))
+        else:
+            # 没有 Content-Length，读取所有可用数据
+            body = self.rfile.read()
         data = json.loads(body)
 
         image_path = data.get('image_path', '')
