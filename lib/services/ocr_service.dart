@@ -83,9 +83,9 @@ class WindowsOcrService implements OcrService {
       '--port', '$_port',
     ]);
 
-    // 监听子进程 stderr（调试用）
+    // 监听子进程 stderr（用 latin1 避免中文编码截断崩溃）
     _pythonProcess!.stderr
-        .transform(utf8.decoder)
+        .transform(latin1.decoder)
         .listen((msg) => debugPrint('[OCR Server] $msg'));
 
     // 3. 等待服务就绪 (health check，最多等 30 秒)

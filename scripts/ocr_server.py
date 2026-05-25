@@ -76,8 +76,10 @@ class OcrHandler(BaseHTTPRequestHandler):
                 w, h = img.size
 
                 x1, y1, x2, y2 = crop_region
+                # 确保所有值都是数字类型
+                x1, y1, x2, y2 = float(x1), float(y1), float(x2), float(y2)
                 # 如果值是 0~1 的相对坐标，转为像素
-                if all(0 <= v <= 1 for v in crop_region):
+                if all(0 <= v <= 1 for v in (x1, y1, x2, y2)):
                     x1, y1, x2, y2 = int(x1 * w), int(y1 * h), int(x2 * w), int(y2 * h)
 
                 # 确保裁剪区域在图片范围内
@@ -93,7 +95,11 @@ class OcrHandler(BaseHTTPRequestHandler):
                 print(f'[WARN] 裁剪失败，使用原图: {e}')
 
         # PaddleOCR 3.x 使用 predict() 方法
-        result = self.ocr.predict(ocr_input_path)
+        try:
+            result = self.ocr.predict(ocr_input_path)
+        except Exception as e:
+            print(f'[ERROR] PaddleOCR predict failed: {e}')
+            raise
 
         # 清理临时文件
         if ocr_input_path != image_path:
@@ -105,11 +111,10 @@ class OcrHandler(BaseHTTPRequestHandler):
 
         texts = []
         for page in result:
-            for rec_text, rec_score, rec_poly in zip(
-                page['rec_texts'],
-                page['rec_scores'],
-                page['rec_polys']
-            ):
+            rec_texts = page.get('rec_texts', []) or []
+            rec_scores = page.get('rec_scores', []) or []
+            rec_polys = page.get('rec_polys', []) or []
+            for rec_text, rec_score, rec_poly in zip(rec_texts, rec_scores, rec_polys):
                 # 将 numpy 数组转为 Python 列表（才能 JSON 序列化）
                 import numpy as np
                 bbox = rec_poly
