@@ -1,22 +1,21 @@
 import 'dart:io';
-import 'package:path_provider/path_provider.dart';
 
-/// Obsidian Vault 写入服务（仅 Windows 端使用）
+/// 共享空间写入服务（仅 Windows 端使用）
 class ObsidianWriter {
-  // Obsidian vault 根路径
-  static const String _vaultRoot = r'E:\02 obsidian\Main\Main';
+  // 共享空间根路径
+  static const String _shareRoot = r'E:\08 vscodeproject\共享空间';
 
   // 海报图片存放目录
-  static const String _postersDir = r'10 Reading\posters';
+  static const String _postersDir = '游戏名句海报';
 
   // 名人名言汇总文件
-  static const String _quotesFile = r'10 Reading\名人名言.md';
+  static const String _quotesFile = '名人名言.md';
 
-  /// 保存海报图片到 Obsidian vault
+  /// 保存海报图片到共享空间
   /// [posterImagePath] 生成的海报临时文件路径
-  /// 返回 vault 中图片的相对路径（用于 wiki-link）
+  /// 返回保存后的完整路径
   static Future<String> savePosterImage(String posterImagePath) async {
-    final postersDir = Directory('$_vaultRoot\\$_postersDir');
+    final postersDir = Directory('$_shareRoot\\$_postersDir');
     if (!await postersDir.exists()) {
       await postersDir.create(recursive: true);
     }
@@ -26,31 +25,25 @@ class ObsidianWriter {
     final destPath = '${postersDir.path}\\$destName';
 
     await File(posterImagePath).copy(destPath);
-    return '$_postersDir\\$destName'.replaceAll('\\', '/');
+    return destPath;
   }
 
   /// 追加名言条目到 名人名言.md
   /// [quoteText] 名言文字
   /// [gameName] 游戏名称
-  /// [imageRelPath] 海报图片在 vault 中的相对路径
+  /// [posterPath] 海报图片完整路径
   static Future<void> appendQuote(
     String quoteText,
     String gameName,
-    String imageRelPath,
+    String posterPath,
   ) async {
-    final quotesFile = File('$_vaultRoot\\$_quotesFile');
-    final readingDir = Directory('$_vaultRoot\\10 Reading');
-    if (!await readingDir.exists()) {
-      await readingDir.create(recursive: true);
+    final shareDir = Directory(_shareRoot);
+    if (!await shareDir.exists()) {
+      await shareDir.create(recursive: true);
     }
 
-    // 检查是否需要添加游戏名分组标题
-    final entry = '- ![[${_getFileName(imageRelPath)}]] "${quoteText}" — *$gameName*';
-    await quotesFile.writeAsString('$entry\n', mode: FileMode.append);
-  }
-
-  /// 从完整路径提取文件名
-  static String _getFileName(String path) {
-    return path.split('/').last;
+    final fileName = posterPath.split('\\').last;
+    final entry = '- ![[游戏名句海报/$fileName]] "${quoteText}" — *$gameName*';
+    await File('$_shareRoot\\$_quotesFile').writeAsString('$entry\n', mode: FileMode.append);
   }
 }
