@@ -76,7 +76,8 @@ class WindowsOcrService implements OcrService {
     _port = await _findFreePort();
 
     // 2. 启动 ocr_server.py 子进程
-    final scriptPath = 'scripts${Platform.pathSeparator}ocr_server.py';
+    // 开发时从项目根目录查找，发布时从 exe 同目录查找
+    final scriptPath = _findScriptPath();
     _pythonProcess = await Process.start('python', [
       scriptPath,
       '--port', '$_port',
@@ -179,6 +180,21 @@ class WindowsOcrService implements OcrService {
     _pythonProcess?.kill();
     _httpClient.close();
     _initialized = false;
+  }
+
+  /// 定位 ocr_server.py 的路径
+  String _findScriptPath() {
+    // 开发模式：相对于当前工作目录（项目根目录）
+    final devPath = 'scripts${Platform.pathSeparator}ocr_server.py';
+    if (File(devPath).existsSync()) return devPath;
+
+    // 发布模式：与 exe 同目录
+    final exeDir = Platform.resolvedExecutable;
+    final releasePath = '${File(exeDir).parent.path}${Platform.pathSeparator}ocr_server.py';
+    if (File(releasePath).existsSync()) return releasePath;
+
+    // 回退：绝对路径（开发用）
+    return r'E:\08 vscodeproject\vs_workplace\游戏截图名句提取\scripts\ocr_server.py';
   }
 
   /// 找一个空闲的 TCP 端口
