@@ -8,6 +8,12 @@ enum PosterTemplate {
   solid,     // 纯色极简
 }
 
+/// 显示模式
+enum DisplayMode {
+  overlay,    // 文字叠加在原图上
+  splitPanel, // 左图右文分栏
+}
+
 /// 输出比例
 enum PosterAspectRatio {
   landscape, // 16:9
@@ -38,6 +44,16 @@ class PosterConfig extends ChangeNotifier {
   // === 裁剪 ===
   Rect _cropRect = const Rect.fromLTWH(0, 0.67, 1, 0.28);
   Rect get cropRect => _cropRect;
+
+  // === 显示模式 ===
+  DisplayMode _displayMode = DisplayMode.overlay;
+  DisplayMode get displayMode => _displayMode;
+
+  // === 文字叠加位置（相对坐标 0~1） ===
+  double _overlayTextX = 0.5;
+  double get overlayTextX => _overlayTextX;
+  double _overlayTextY = 0.5;
+  double get overlayTextY => _overlayTextY;
 
   // === 模板 ===
   PosterTemplate _template = PosterTemplate.blur;
@@ -85,6 +101,17 @@ class PosterConfig extends ChangeNotifier {
 
   void setCropRect(Rect rect) {
     _cropRect = rect;
+    notifyListeners();
+  }
+
+  void setDisplayMode(DisplayMode mode) {
+    _displayMode = mode;
+    notifyListeners();
+  }
+
+  void setOverlayTextPosition(double x, double y) {
+    _overlayTextX = x.clamp(0.05, 0.95);
+    _overlayTextY = y.clamp(0.05, 0.95);
     notifyListeners();
   }
 

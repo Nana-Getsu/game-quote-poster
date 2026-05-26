@@ -2,8 +2,9 @@ import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import '../models/poster_config.dart';
+import 'text_overlay_editor.dart';
 
-/// 海报实时预览区（支持 16:9 / 9:16 / 4:3，4 套模板）
+/// 海报预览区（支持两种模式 + 4 套模板 + 3 比例）
 class PosterPreview extends StatelessWidget {
   final PosterConfig config;
 
@@ -13,6 +14,14 @@ class PosterPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasImage = config.imagePath != null;
 
+    // 模式 A：文字叠加
+    if (config.displayMode == DisplayMode.overlay) {
+      return hasImage
+          ? TextOverlayEditor(config: config)
+          : _buildPlaceholder();
+    }
+
+    // 模式 B：左图右文
     return LayoutBuilder(
       builder: (context, constraints) {
         final size = _calculateSize(constraints.maxWidth, constraints.maxHeight);

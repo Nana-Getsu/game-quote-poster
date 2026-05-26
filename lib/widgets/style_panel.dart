@@ -27,6 +27,10 @@ class StylePanel extends StatelessWidget {
           _buildTextField(config),
           const SizedBox(height: 12),
 
+          // 模式切换
+          _buildModeSwitch(config),
+          const SizedBox(height: 8),
+
           // 参数控制行
           Wrap(
             spacing: 16,
@@ -58,6 +62,23 @@ class StylePanel extends StatelessWidget {
         alignLabelWithHint: true,
       ),
       onChanged: (text) => config.setExtractedText(text),
+    );
+  }
+
+  Widget _buildModeSwitch(PosterConfig config) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text('显示模式: '),
+        SegmentedButton<DisplayMode>(
+          segments: const [
+            ButtonSegment(value: DisplayMode.overlay, label: Text('文字叠加')),
+            ButtonSegment(value: DisplayMode.splitPanel, label: Text('左图右文')),
+          ],
+          selected: {config.displayMode},
+          onSelectionChanged: (s) => config.setDisplayMode(s.first),
+        ),
+      ],
     );
   }
 
