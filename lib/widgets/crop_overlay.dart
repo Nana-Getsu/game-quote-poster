@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/poster_config.dart';
-import '../services/ocr_service.dart' show createOcrService, OcrRect;
 
 /// 文字区域裁剪框（叠加在原图上）
 /// 支持拖拽移动 + 拖边缩放
@@ -73,32 +72,11 @@ class _CropOverlayState extends State<CropOverlay> {
     _lastCropRect = null;
     _dragMode = null;
 
-    // 拖拽结束后延迟触发 OCR 重新识别
+    // 拖拽结束后延迟触发 OCR 重新识别（回调到 style_panel 统一处理）
     _debounceTimer?.cancel();
     _debounceTimer = Timer(const Duration(milliseconds: 500), () {
-      _reRunOcr();
-    });
-  }
-
-  void _reRunOcr() {
-    final config = context.read<PosterConfig>();
-    final imagePath = config.imagePath;
-    if (imagePath == null) return;
-
-    final ocrService = createOcrService();
-    final r = config.cropRect;
-    final ocrRect = OcrRect(left: r.left, top: r.top, width: r.width, height: r.height);
-
-    ocrService.init().then((_) {
-      ocrService.recognize(
-        imagePath,
-        cropRegion: ocrRect,
-      ).then((results) {
-        final text = results.map((r) => r.text).join('\n');
-        config.setExtractedText(text);
-      }).catchError((e) {
-        debugPrint('OCR 失败: $e');
-      });
+      final config = context.read<PosterConfig>();
+      config.setCropRect(config.cropRect); // 触发通知
     });
   }
 

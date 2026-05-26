@@ -53,13 +53,19 @@ abstract class OcrService {
 
 /// 平台工厂：根据平台返回对应实现
 OcrService createOcrService() {
+  if (_cachedService != null) return _cachedService!;
+
   if (defaultTargetPlatform == TargetPlatform.windows) {
-    return WindowsOcrService();
+    _cachedService = WindowsOcrService();
   } else if (defaultTargetPlatform == TargetPlatform.android) {
-    return AndroidOcrService();
+    _cachedService = AndroidOcrService();
+  } else {
+    throw UnsupportedError('不支持当前平台');
   }
-  throw UnsupportedError('不支持当前平台');
+  return _cachedService!;
 }
+
+OcrService? _cachedService;
 
 // === Windows 实现 (PaddleOCR via HTTP) ===
 class WindowsOcrService implements OcrService {
